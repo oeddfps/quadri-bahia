@@ -98,7 +98,7 @@ export default function Passeios() {
       const { data, error } = await supabase
         .from("quadribahia_passeios")
         .select("*")
-        .order("nome");
+        .order("id");
       if (error) throw error;
       return data as Passeio[];
     },

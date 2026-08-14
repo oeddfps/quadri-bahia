@@ -39,6 +39,7 @@ interface Reserva {
   telefone: string | null;
   data_pagamento: string | null;
   codigo_moto: string | null;
+  observacao_outro: string | null;
 }
 
 export default function Agendamentos() {
@@ -76,6 +77,7 @@ export default function Agendamentos() {
   const [confirmado, setConfirmado] = useState(false);
   const [telefone, setTelefone] = useState("");
   const [codigoMoto, setCodigoMoto] = useState("");
+  const [observacaoOutro, setObservacaoOutro] = useState("");
   const [motosSelecionadas, setMotosSelecionadas] = useState<string[]>([""]);
   const [quantidade, setQuantidade] = useState(1);
 
@@ -165,7 +167,7 @@ export default function Agendamentos() {
     try {
       const [reservasRes, passeiosRes, motosRes] = await Promise.all([
         supabase.from("quadribahia_reservas").select("*").order("data", { ascending: true }),
-        supabase.from("quadribahia_passeios").select("*").eq("ativo", true).order("nome"),
+        supabase.from("quadribahia_passeios").select("*").eq("ativo", true).order("id"),
         supabase.from("quadribahia_motos").select("*").order("ordem"),
       ]);
 
@@ -207,6 +209,7 @@ export default function Agendamentos() {
         "Hotel": reserva.hotel || "-",
         "Apartamento": reserva.apartamento || "-",
         "Passeio": passeio?.nome || "-",
+        "Observacao Outro": reserva.observacao_outro || "-",
         "Horário": reserva.horario || "-",
         "Valor Total": formatCurrency(reserva.valor),
         "Valor Pago": formatCurrency(reserva.valor_pago),
@@ -255,6 +258,7 @@ export default function Agendamentos() {
     setConfirmado(false);
     setTelefone("");
     setCodigoMoto("");
+    setObservacaoOutro("");
     setMotosSelecionadas([""]);
     setQuantidade(1);
     setEditingReserva(null);
@@ -276,6 +280,7 @@ export default function Agendamentos() {
     setConfirmado(reserva.confirmado);
     setTelefone(reserva.telefone || "");
     setCodigoMoto(reserva.codigo_moto || "");
+    setObservacaoOutro(reserva.observacao_outro || "");
     setMotosSelecionadas([reserva.codigo_moto || ""]);
     setDialogOpen(true);
   };
@@ -299,6 +304,11 @@ export default function Agendamentos() {
     try {
       if (!responsavel || !passeioId || !data || !valor) {
         toast.error("Preencha todos os campos obrigatórios");
+        return;
+      }
+
+      if (passeioSelecionado?.nome === "Outro" && !observacaoOutro.trim()) {
+        toast.error("Informe a observação do passeio Outro");
         return;
       }
 
@@ -342,6 +352,7 @@ export default function Agendamentos() {
         confirmado,
         telefone: telefone || null,
         codigo_moto: codigoMoto || null,
+        observacao_outro: passeioSelecionado?.nome === "Outro" ? observacaoOutro.trim() : null,
       };
 
       const deveRegistrarPagamento = valorPagoNum > 0 && !!dataPagamento;
@@ -623,6 +634,19 @@ export default function Agendamentos() {
                     </Select>
                   </div>
                 </div>
+
+                {passeioSelecionado?.nome === "Outro" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="observacaoOutro">Observação do passeio *</Label>
+                    <Input
+                      id="observacaoOutro"
+                      value={observacaoOutro}
+                      onChange={(e) => setObservacaoOutro(e.target.value)}
+                      placeholder="Descreva qual passeio o cliente solicitou"
+                      required
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label>Participantes (opcional)</Label>
@@ -1538,6 +1562,12 @@ export default function Agendamentos() {
                   <p className="text-xs text-muted-foreground">Passeio</p>
                   <p className="font-medium">{passeios.find(p => p.id === reservaDetalhe.passeio_id)?.nome || "-"}</p>
                 </div>
+                {reservaDetalhe.observacao_outro && (
+                  <div className="col-span-2">
+                    <p className="text-xs text-muted-foreground">Observação do passeio</p>
+                    <p className="font-medium">{reservaDetalhe.observacao_outro}</p>
+                  </div>
+                )}
                 <div>
                   <p className="text-xs text-muted-foreground">Data</p>
                   <p className="font-medium">

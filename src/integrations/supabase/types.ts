@@ -10664,6 +10664,7 @@ export type Database = {
           horario: string | null
           hotel: string | null
           id: string
+          observacao_outro: string | null
           participantes: string | null
           passeio_id: number
           periodo: string | null
@@ -10685,6 +10686,7 @@ export type Database = {
           horario?: string | null
           hotel?: string | null
           id?: string
+          observacao_outro?: string | null
           participantes?: string | null
           passeio_id: number
           periodo?: string | null
@@ -10706,6 +10708,7 @@ export type Database = {
           horario?: string | null
           hotel?: string | null
           id?: string
+          observacao_outro?: string | null
           participantes?: string | null
           passeio_id?: number
           periodo?: string | null
