@@ -1,0 +1,1 @@
+ALTER TABLE public.quadribahia_reservas ADD COLUMN codigo_moto TEXT DEFAULT NULL;
