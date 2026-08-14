@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { format, parseISO, isFuture, isToday as isTodayFn, startOfDay, isWithinInterval, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
-import * as XLSX from 'xlsx';
+import { downloadCsv } from "@/lib/csv";
 
 interface Passeio {
   id: number;
@@ -124,11 +124,8 @@ export default function Recebimentos() {
       }))
     ).flat();
 
-    const worksheet = XLSX.utils.json_to_sheet(dadosExportacao);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Recebimentos');
+    downloadCsv(dadosExportacao, `recebimentos_${format(new Date(), "dd-MM-yyyy")}.csv`);
     
-    XLSX.writeFile(workbook, `recebimentos_${format(new Date(), "dd-MM-yyyy")}.xlsx`);
     toast.success("Relatório exportado com sucesso!");
   };
 
@@ -177,7 +174,7 @@ export default function Recebimentos() {
       return acc;
     }, {} as Record<string, RecebimentoPorData>);
 
-  let recebimentosArray = Object.values(recebimentosPorData).sort((a, b) => 
+  const recebimentosArray = Object.values(recebimentosPorData).sort((a, b) => 
     new Date(a.data).getTime() - new Date(b.data).getTime()
   );
 

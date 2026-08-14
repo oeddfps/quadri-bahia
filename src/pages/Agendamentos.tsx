@@ -8,10 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Plus, Edit, Trash2, Check, Clock, ChevronLeft, ChevronRight, Maximize2, Copy, Download } from "lucide-react";
-import * as XLSX from "xlsx";
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, addMonths, subMonths, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { downloadCsv } from "@/lib/csv";
 
 interface Passeio {
   id: number;
@@ -169,9 +169,9 @@ export default function Agendamentos() {
         supabase.from("quadribahia_motos").select("*").order("ordem"),
       ]);
 
-      if (reservasRes.error) throw reservasRes.error;
-      if (passeiosRes.error) throw passeiosRes.error;
-      if (motosRes.error) throw motosRes.error;
+      if (reservasRes.error) toast.error("Erro ao carregar reservas: " + reservasRes.error.message);
+      if (passeiosRes.error) toast.error("Erro ao carregar passeios: " + passeiosRes.error.message);
+      if (motosRes.error) toast.error("Erro ao carregar motos: " + motosRes.error.message);
 
       setReservas((reservasRes.data || []).map((r: any) => ({
         ...r,
@@ -215,16 +215,12 @@ export default function Agendamentos() {
       };
     });
 
-    const ws = XLSX.utils.json_to_sheet(dadosExportar);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Agendamentos");
-    
     const nomeArquivo = filterData 
-      ? `agendamentos_${filterData}.xlsx`
-      : `agendamentos_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
+      ? `agendamentos_${filterData}.csv`
+      : `agendamentos_${format(new Date(), "yyyy-MM-dd")}.csv`;
     
-    XLSX.writeFile(wb, nomeArquivo);
-    toast.success("Arquivo Excel exportado com sucesso!");
+    downloadCsv(dadosExportar, nomeArquivo);
+    toast.success("Arquivo CSV exportado com sucesso!");
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -616,9 +612,13 @@ export default function Agendamentos() {
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
                       <SelectContent>
-                        {passeios.map((p) => (
-                          <SelectItem key={p.id} value={p.id.toString()}>{p.nome}</SelectItem>
-                        ))}
+                        {passeios.length > 0 ? (
+                          passeios.map((p) => (
+                            <SelectItem key={p.id} value={p.id.toString()}>{p.nome}</SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="sem-passeios" disabled>Nenhum passeio cadastrado</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -676,9 +676,13 @@ export default function Agendamentos() {
                         <SelectValue placeholder="Selecione a moto" />
                       </SelectTrigger>
                       <SelectContent>
-                        {motos.map((m) => (
-                          <SelectItem key={m.id} value={m.nome}>{m.nome}</SelectItem>
-                        ))}
+                        {motos.length > 0 ? (
+                          motos.map((m) => (
+                            <SelectItem key={m.id} value={m.nome}>{m.nome}</SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="sem-motos" disabled>Nenhuma moto cadastrada</SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -703,9 +707,13 @@ export default function Agendamentos() {
                             <SelectValue placeholder={quantidade > 1 ? `Vaga ${idx + 1}` : "Selecione a moto"} />
                           </SelectTrigger>
                           <SelectContent>
-                            {motos.map((m) => (
-                              <SelectItem key={m.id} value={m.nome}>{m.nome}</SelectItem>
-                            ))}
+                            {motos.length > 0 ? (
+                              motos.map((m) => (
+                                <SelectItem key={m.id} value={m.nome}>{m.nome}</SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="sem-motos" disabled>Nenhuma moto cadastrada</SelectItem>
+                            )}
                           </SelectContent>
                         </Select>
                       ))}

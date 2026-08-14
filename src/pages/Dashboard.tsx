@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import * as XLSX from "xlsx";
+import { downloadCsv } from "@/lib/csv";
 
 interface Metricas {
   total_reservas: number;
@@ -481,7 +481,7 @@ export default function Dashboard() {
 
   const totalQuadriciclos = reservas.length;
 
-  // Exportar para Excel
+  // Exportar para CSV
   const exportarExcel = () => {
     const dados = fluxoCaixaDiario.map(dia => ({
       'Data': dia.dataFormatada,
@@ -506,15 +506,12 @@ export default function Dashboard() {
       'Total do Dia (R$)': totaisPeriodo.total.toFixed(2)
     });
 
-    const ws = XLSX.utils.json_to_sheet(dados);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Fluxo de Caixa");
     
     const periodoNome = dataInicio && dataFim 
       ? `${format(dataInicio, "dd-MM-yyyy")}_a_${format(dataFim, "dd-MM-yyyy")}`
       : "periodo";
     
-    XLSX.writeFile(wb, `fluxo_caixa_${periodoNome}.xlsx`);
+    downloadCsv(dados, `fluxo_caixa_${periodoNome}.csv`);
     toast.success("Relatório exportado com sucesso!");
   };
 
