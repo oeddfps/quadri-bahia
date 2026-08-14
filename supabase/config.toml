@@ -1,4 +1,0 @@
-project_id = "fkqzkgllxqwegcitsmxl"
-
-[functions.create-master-user]
-verify_jwt = false
