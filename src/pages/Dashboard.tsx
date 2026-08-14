@@ -240,9 +240,9 @@ export default function Dashboard() {
         supabase.from("quadribahia_pagamentos").select("*").order("data_pagamento", { ascending: false })
       ]);
 
-      if (reservasRes.error) throw reservasRes.error;
-      if (passeiosRes.error) throw passeiosRes.error;
-      if (pagamentosRes.error) throw pagamentosRes.error;
+      if (reservasRes.error) throw new Error(`reservas: ${reservasRes.error.message}`);
+      if (passeiosRes.error) throw new Error(`passeios: ${passeiosRes.error.message}`);
+      if (pagamentosRes.error) throw new Error(`pagamentos: ${pagamentosRes.error.message}`);
 
       // Supabase retorna numeric como string às vezes; normalizar para number
       const reservasData = (reservasRes.data || []).map((r: any) => ({

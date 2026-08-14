@@ -91,8 +91,8 @@ export default function Recebimentos() {
         supabase.from("quadribahia_passeios").select("*").eq("ativo", true).order("nome")
       ]);
 
-      if (reservasRes.error) throw reservasRes.error;
-      if (passeiosRes.error) throw passeiosRes.error;
+      if (reservasRes.error) throw new Error(`reservas: ${reservasRes.error.message}`);
+      if (passeiosRes.error) throw new Error(`passeios: ${passeiosRes.error.message}`);
 
       setReservas(reservasRes.data || []);
       setPasseios(passeiosRes.data || []);

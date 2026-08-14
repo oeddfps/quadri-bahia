@@ -95,17 +95,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const normalized = username.trim().toLowerCase();
 
-      // Detectar se é email ou username
-      const email = normalized.includes("@")
-        ? normalized
-        : `${normalized}@quadribahia.com`;
+      const emails = normalized.includes("@")
+        ? [normalized]
+        : [`${normalized}@quadribahia.com.br`, `${normalized}@quadribahia.com`];
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      let lastError: unknown = null;
+      for (const email of emails) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
 
-      if (error) {
+        if (!error) {
+          lastError = null;
+          break;
+        }
+
+        lastError = error;
+      }
+
+      if (lastError) {
         toast({
           title: "Erro ao fazer login",
           description: "Usuário ou senha incorretos",
